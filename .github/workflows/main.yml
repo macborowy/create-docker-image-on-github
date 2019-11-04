@@ -1,0 +1,23 @@
+name: Main CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      APP_NAME: github-docker-image
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Login to Github Package Registry
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+
+    - name: Build docker image
+      run: docker build . --file Dockerfile --tag docker.pkg.github.com/${{ github.repository }}/$APP_NAME:${GITHUB_SHA::7}
+
+    - name: Push docker image
+      run: docker push docker.pkg.github.com/${{ github.repository }}/$APP_NAME:${GITHUB_SHA::7}
